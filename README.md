@@ -52,7 +52,6 @@ Use `python generate.py --help` to see more options.
     - `model.py` : Calculate loss and optimizing
     - utils
         - `data.py` : Utilities for loading data
-        - `logger.py` : Utilities for logging
     - test
         - Some tests for check if it's correct model like casual, dilated..
 - `train.py` : A script for WaveNet training
