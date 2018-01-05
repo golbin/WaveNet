@@ -44,7 +44,7 @@ Use `python generate.py --help` to see more options.
 
 ## File structures
 
-`modules.py` and `model.py` is main implementations.
+`networks.py` and `model.py` is main implementations.
 
 - wavenet
     - `config.py` : Training options
