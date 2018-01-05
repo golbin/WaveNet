@@ -15,7 +15,6 @@ from wavenet.exceptions import InputSizeError
 
 class DilatedCausalConv1d(torch.nn.Module):
     """Dilated Causal Convolution for WaveNet"""
-
     def __init__(self, channels, dilation=1):
         super(DilatedCausalConv1d, self).__init__()
 
@@ -38,7 +37,6 @@ class DilatedCausalConv1d(torch.nn.Module):
 
 class CausalConv1d(torch.nn.Module):
     """Causal Convolution for WaveNet"""
-
     def __init__(self, in_channels, out_channels):
         super(CausalConv1d, self).__init__()
 
