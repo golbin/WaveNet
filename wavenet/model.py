@@ -44,9 +44,6 @@ class WaveNet:
         if torch.cuda.is_available():
             self.net.cuda()
 
-    def decay_optimizer(self, num_steps, decay_step):
-        self.optimizer.param_groups[0]['lr'] -= self.lr / (num_steps - decay_step)
-
     def train(self, inputs, targets):
         """
         Train 1 time

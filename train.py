@@ -35,9 +35,6 @@ class Trainer:
 
             print('[{0}/{1}] loss: {2}'.format(total_steps, args.num_steps, loss))
 
-            if total_steps % 100 is 0:
-                self.wavenet.decay_optimizer(self.args.num_steps, self.args.decay_step)
-
             if total_steps > self.args.num_steps:
                 break
 
