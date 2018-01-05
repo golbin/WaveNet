@@ -60,6 +60,9 @@ Use `python generate.py --help` to see more options.
 
 # TODO
 
+- [ ] Add some nice samples
+- [ ] Global conditions
+- [ ] Local conditions
 - [ ] Faster generating
 - [ ] Parallel WaveNet
 - [ ] General Generator
