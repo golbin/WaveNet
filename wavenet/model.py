@@ -72,20 +72,32 @@ class WaveNet:
 
         return outputs
 
-    def load(self, model_dir):
+    @staticmethod
+    def get_model_path(model_dir, step=0):
+        basename = 'wavenet'
+
+        if step:
+            return os.path.join(model_dir, '{0}_{1}.pkl'.format(basename, step))
+        else:
+            return os.path.join(model_dir, '{0}.pkl'.format(basename))
+
+    def load(self, model_dir, step=0):
         """
         Load pre-trained model
         :param model_dir:
+        :param step:
         :return:
         """
         print("Loading model from {0}".format(model_dir))
 
-        self.net.load_state_dict(torch.load(
-                                 os.path.join(model_dir, 'wavenet.pkl')))
+        model_path = self.get_model_path(model_dir, step)
 
-    def save(self, model_dir):
+        self.net.load_state_dict(torch.load(model_path))
+
+    def save(self, model_dir, step=0):
         print("Saving model into {0}".format(model_dir))
 
-        torch.save(self.net.state_dict(),
-                   os.path.join(model_dir, 'wavenet.pkl'))
+        model_path = self.get_model_path(model_dir, step)
+
+        torch.save(self.net.state_dict(), model_path)
 

@@ -18,6 +18,8 @@ class Generator:
         self.wavenet = WaveNet(args.layer_size, args.stack_size,
                                args.in_channels, args.res_channels)
 
+        self.wavenet.load(args.model_dir, args.step)
+
     @staticmethod
     def _variable(data):
         tensor = torch.from_numpy(data).float()

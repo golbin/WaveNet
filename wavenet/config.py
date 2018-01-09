@@ -24,7 +24,8 @@ def parse_args(is_training=True):
         parser.add_argument('--num_steps', type=int, default=100000, help='Total training steps')
         parser.add_argument('--lr', type=float, default=0.0002, help='learning rate decay')
     else:
-        parser.add_argument('--model', type=str, required=True, help='Pre-trained model dir')
+        parser.add_argument('--model_dir', type=str, required=True, help='Pre-trained model dir')
+        parser.add_argument('--step', type=int, default=0, help='A specific step of pre-trained model to use')
         parser.add_argument('--seed', type=str, help='A seed file to generate sound')
         parser.add_argument('--out', type=str, help='Output file name which is generated')
 
