@@ -113,9 +113,20 @@ class ResidualStack(torch.nn.Module):
 
         self.layer_size = layer_size
         self.stack_size = stack_size
-        self.dilations = self.build_dilations()
-        self.res_blocks = torch.nn.ModuleList([ResidualBlock(res_channels, skip_channels, dilation)
-                                               for dilation in self.dilations])
+
+        self.res_blocks = self.stack_res_block(res_channels, skip_channels)
+
+    @staticmethod
+    def _residual_block(res_channels, skip_channels, dilation):
+        block = ResidualBlock(res_channels, skip_channels, dilation)
+
+        if torch.cuda.device_count() > 1:
+            block = torch.nn.DataParallel(block)
+
+        if torch.cuda.is_available():
+            block.cuda()
+
+        return block
 
     def build_dilations(self):
         dilations = []
@@ -127,6 +138,20 @@ class ResidualStack(torch.nn.Module):
                 dilations.append(2 ** l)
 
         return dilations
+
+    def stack_res_block(self, res_channels, skip_channels):
+        """
+        Prepare dilated convolution blocks by layer and stack size
+        :return:
+        """
+        res_blocks = []
+        dilations = self.build_dilations()
+
+        for dilation in dilations:
+            block = self._residual_block(res_channels, skip_channels, dilation)
+            res_blocks.append(block)
+
+        return res_blocks
 
     def forward(self, x, skip_size):
         """
