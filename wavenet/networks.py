@@ -15,10 +15,10 @@ from wavenet.exceptions import InputSizeError
 
 class DilatedCausalConv1d(torch.nn.Module):
     """Dilated Causal Convolution for WaveNet"""
-    def __init__(self, channels, dilation=1):
+    def __init__(self, channels_in, channels_out, dilation=1):
         super(DilatedCausalConv1d, self).__init__()
 
-        self.conv = torch.nn.Conv1d(channels, channels,
+        self.conv = torch.nn.Conv1d(channels_in, channels_out,
                                     kernel_size=2, stride=1,  # Fixed for WaveNet
                                     dilation=dilation,
                                     padding=0,  # Fixed for WaveNet dilation
@@ -66,8 +66,9 @@ class ResidualBlock(torch.nn.Module):
         :param dilation:
         """
         super(ResidualBlock, self).__init__()
+        self.res_channels = res_channels
 
-        self.dilated = DilatedCausalConv1d(res_channels, dilation=dilation)
+        self.dilated = DilatedCausalConv1d(res_channels, res_channels * 2, dilation=dilation)  # for gating
         self.conv_res = torch.nn.Conv1d(res_channels, res_channels, 1)
         self.conv_skip = torch.nn.Conv1d(res_channels, skip_channels, 1)
 
@@ -83,8 +84,8 @@ class ResidualBlock(torch.nn.Module):
         output = self.dilated(x)
 
         # PixelCNN gate
-        gated_tanh = self.gate_tanh(output)
-        gated_sigmoid = self.gate_sigmoid(output)
+        gated_tanh = self.gate_tanh(output[:, :self.res_channels, :])
+        gated_sigmoid = self.gate_sigmoid(output[:, self.res_channels:, :])
         gated = gated_tanh * gated_sigmoid
 
         # Residual network
@@ -95,6 +96,7 @@ class ResidualBlock(torch.nn.Module):
         # Skip connection
         skip = self.conv_skip(gated)
         skip = skip[:, :, -skip_size:]
+        # we output last skip_size values bc those are the values that exceeds the receptive field size
 
         return output, skip
 
