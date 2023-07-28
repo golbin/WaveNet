@@ -25,7 +25,7 @@ class Trainer:
                 for inputs, targets in dataset:
                     yield inputs, targets
 
-    def run(self):
+    def run(self):  # todo: add validation data loader
         total_steps = 0
 
         for inputs, targets in self.infinite_batch():

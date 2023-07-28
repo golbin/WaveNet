@@ -144,6 +144,7 @@ class DataLoader(data.DataLoader):
                       self._variable(one_hot_decode(targets, 2))
 
                 audio = audio[:, sample_size-self.receptive_fields:, :]
+                # maybe slide not by receptive field but by 1 sample
                 sample_size = self.calc_sample_size(audio)
         else:
             targets = audio[:, self.receptive_fields:, :]
