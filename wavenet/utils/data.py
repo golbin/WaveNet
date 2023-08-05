@@ -63,7 +63,7 @@ def mu_law_decode(output, quantization_channels=256):
 
 
 class Dataset(data.Dataset):
-    def __init__(self, data_dir, sample_rate=16000, in_channels=256, trim=True):
+    def __init__(self, data_dir, sample_rate=16000, in_channels=256, trim=True, use_shuffle=False):
         super(Dataset, self).__init__()
 
         self.in_channels = in_channels
@@ -73,8 +73,18 @@ class Dataset(data.Dataset):
         self.root_path = data_dir
         self.filenames = [x for x in sorted(os.listdir(data_dir))]
 
+        self._use_shuffle = use_shuffle
+        self._indexes = np.arange(len(self.filenames))
+        self.shuffle_set()
+
+    def shuffle_set(self):
+        np.random.shuffle(self._indexes)
+
     def __getitem__(self, index):
-        filepath = os.path.join(self.root_path, self.filenames[index])
+        if self._use_shuffle:
+            filepath = os.path.join(self.root_path, self.filenames[self._indexes[index]])
+        else:
+            filepath = os.path.join(self.root_path, self.filenames[index])
 
         raw_audio = load_audio(filepath, self.sample_rate, self.trim)
 
