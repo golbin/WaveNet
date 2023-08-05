@@ -19,7 +19,7 @@ class Trainer:
         self.data_loader = DataLoader(args.data_dir, self.wavenet.receptive_fields,
                                       args.sample_size, args.sample_rate, args.in_channels)
 
-    def infinite_batch(self):
+    def infinite_train_batch(self):
         while True:
             for dataset in self.data_loader:
                 for inputs, targets in dataset:
@@ -28,7 +28,7 @@ class Trainer:
     def run(self):  # todo: add validation data loader
         total_steps = 0
 
-        for inputs, targets in self.infinite_batch():
+        for inputs, targets in self.infinite_train_batch():
             loss = self.wavenet.train(inputs, targets)
 
             total_steps += 1
