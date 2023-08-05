@@ -9,7 +9,7 @@ from tqdm import tqdm
 
 import wavenet.config as config
 from wavenet.model import WaveNet
-from wavenet.utils.data import DataLoader, Dataset
+from wavenet.utils.data import DataLoader, Dataset, one_hot_decode
 
 
 class Trainer:
@@ -29,7 +29,7 @@ class Trainer:
                 for inputs, targets in dataset:
                     yield inputs, targets
 
-    def run(self):  # todo: add validation data loader
+    def run(self):
         total_steps = 0
 
         for inputs, targets in self.infinite_train_batch():
@@ -86,7 +86,7 @@ class QuasiTrainer:
         _log_cat = "Loss/train" if mode == "train" else "Loss/val"
         steps = 0
         losses = []
-        for audio in _set:  # todo: is it working?
+        for audio in _set:
             audio = np.expand_dims(audio, 0)
             audio = np.pad(audio, [[0, 0], [self.receptive_field, 0], [0, 0]], 'constant')
 
@@ -94,6 +94,9 @@ class QuasiTrainer:
             while sample_size > self.receptive_field:
                 inputs = audio[:, :sample_size, :]
                 targets = audio[:, self.receptive_field:sample_size, :]
+
+                inputs = DataLoader._variable(inputs)
+                targets = DataLoader._variable(one_hot_decode(targets, 2))
 
                 if mode == "train":
                     loss = self.wavenet.train(inputs, targets)
