@@ -10,7 +10,7 @@ import torch
 import torch.utils.data as data
 
 
-def load_audio(filename, sample_rate=16000, trim=True, trim_frame_length=2048):
+def load_audio(filename, sample_rate=16000, trim=False, trim_frame_length=2048):
     audio, _ = librosa.load(filename, sr=sample_rate, mono=True)
     audio = audio.reshape(-1, 1)
 
