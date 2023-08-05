@@ -60,7 +60,13 @@ class WaveNet:
         loss.backward()
         self.optimizer.step()
 
-        return loss.data[0]
+        return loss.data
+
+    def eval(self, inputs, targets):
+        outputs = self.net(inputs)
+        loss = self.loss(outputs.view(-1, self.in_channels),
+                         targets.long().view(-1))
+        return loss
 
     def generate(self, inputs):
         """

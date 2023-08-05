@@ -19,10 +19,13 @@ parser.add_argument('--sample_size', type=int, default=100000, help='Sample size
 
 def parse_args(is_training=True):
     if is_training:
-        parser.add_argument('--data_dir', type=str, default='./test/data', help='Training data dir')
+        parser.add_argument('--train_data_dir', type=str, default='./test/data', help='Training data dir')
+        parser.add_argument('--val_data_dir', type=str, default='./test/data', help='Validation data dir')
         parser.add_argument('--output_dir', type=str, default='./output', help='Output dir for saving model and etc')
         parser.add_argument('--num_steps', type=int, default=100000, help='Total training steps')
+        parser.add_argument('--epochs', type=int, default=100, help='Total number of epochs')
         parser.add_argument('--lr', type=float, default=0.0002, help='learning rate decay')
+        parser.add_argument("--quasi", action="store_true", help="Use quasi trainer")
     else:
         parser.add_argument('--model_dir', type=str, required=True, help='Pre-trained model dir')
         parser.add_argument('--step', type=int, default=0, help='A specific step of pre-trained model to use')
