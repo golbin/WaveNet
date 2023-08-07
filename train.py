@@ -64,6 +64,7 @@ class QuasiTrainer:
 
         self.receptive_field = self.wavenet.receptive_fields
         self._sample_size = self.args.sample_size
+        self._batch_size = self.args.batch_size
 
         self._writer = SummaryWriter(args.log_dir)
 
@@ -77,9 +78,18 @@ class QuasiTrainer:
             self.val_dataset.shuffle_set()
             self.wavenet.save(args.model_dir, step=epoch_idx)
 
-    def _calc_sample_size(self, audio):
-        return self._sample_size if len(audio[0]) >= self._sample_size\
-                                else len(audio[0])
+    @staticmethod
+    def _calc_sample_size(sample_size, batch_size, receptive_fields):
+        ss = sample_size * batch_size - receptive_fields * (batch_size - 1)
+        return ss
+
+    @staticmethod
+    def _create_batch(inputs, batch_size, sample_size, receptive_fields):
+        out = np.zeros([batch_size, sample_size, inputs.shape[-1]])
+        for in_bs_pos in range(batch_size):
+            audio_pos = in_bs_pos * (sample_size - receptive_fields)
+            out[in_bs_pos, :, :] = inputs[:, audio_pos: audio_pos + sample_size, :]
+        return out
 
     def _epoch(self, epoch_idx, mode="train"):  # train or val
         _set = self.train_dataset if mode == "train" else self.val_dataset
@@ -90,22 +100,28 @@ class QuasiTrainer:
             audio = np.expand_dims(audio, 0)
             audio = np.pad(audio, [[0, 0], [self.receptive_field, 0], [0, 0]], 'constant')
 
-            sample_size = self._calc_sample_size(audio)
-            while sample_size > self.receptive_field:
+            sample_size = self._calc_sample_size(
+                self._sample_size, self._batch_size, self.wavenet.receptive_fields
+            )
+            while audio.shape[1] > sample_size:
                 inputs = audio[:, :sample_size, :]
-                targets = audio[:, self.receptive_field:sample_size, :]
 
-                inputs = DataLoader._variable(inputs)
-                targets = DataLoader._variable(one_hot_decode(targets, 2))
+                batched_inputs = self._create_batch(inputs, self._batch_size, self._sample_size, self.receptive_field)
+                batched_targets = batched_inputs[:, self.receptive_field:, :]
+
+                batched_inputs = DataLoader._variable(batched_inputs)
+                batched_targets = DataLoader._variable(one_hot_decode(batched_targets, 2))
 
                 if mode == "train":
-                    loss = self.wavenet.train(inputs, targets)
+                    loss = self.wavenet.train(batched_inputs, batched_targets)
                 else:  # evaluate
-                    loss = self.wavenet.eval(inputs, targets)
+                    loss = self.wavenet.eval(batched_inputs, batched_targets)
                 losses.append(loss)
 
                 audio = audio[:, sample_size - self.receptive_field:, :]
-                sample_size = self._calc_sample_size(audio)
+                sample_size = self._calc_sample_size(
+                    self._sample_size, self._batch_size, self.wavenet.receptive_fields
+                )
 
                 steps += 1
         _loss = np.mean(np.array(losses))
