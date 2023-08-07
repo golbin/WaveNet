@@ -69,7 +69,8 @@ class QuasiTrainer:
         self._writer = SummaryWriter(args.log_dir)
 
     def run(self):
-        for epoch_idx in tqdm(range(self.args.epochs)):
+        for epoch_idx in range(self.args.epochs):
+            print(f"Epoch {epoch_idx}")
             train_loss = self._epoch(epoch_idx, "train")
             # save model after each epoch
             val_loss = self._epoch(epoch_idx, "val")
@@ -96,7 +97,7 @@ class QuasiTrainer:
         _log_cat = "Loss/train" if mode == "train" else "Loss/val"
         steps = 0
         losses = []
-        for audio in _set:
+        for audio in tqdm(_set):
             audio = np.expand_dims(audio, 0)
             audio = np.pad(audio, [[0, 0], [self.receptive_field, 0], [0, 0]], 'constant')
 
