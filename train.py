@@ -117,7 +117,7 @@ class QuasiTrainer:
                     loss = self.wavenet.train(batched_inputs, batched_targets)
                 else:  # evaluate
                     loss = self.wavenet.eval(batched_inputs, batched_targets)
-                losses.append(loss)
+                losses.append(loss.cpu())
 
                 audio = audio[:, sample_size - self.receptive_field:, :]
                 sample_size = self._calc_sample_size(
